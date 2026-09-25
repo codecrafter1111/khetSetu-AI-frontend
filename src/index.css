@@ -7,3 +7,40 @@
   button { cursor: pointer; }
   :focus-visible { @apply outline-2 outline-offset-2 outline-emerald-600; }
 }
+
+@media (max-height: 1050px) {
+  .farmer-sidebar-promo { display: none; }
+}
+
+@media (max-height: 700px) {
+  #farmer-sidebar { padding-top: 12px; padding-bottom: 8px; }
+  .farmer-sidebar-brand { padding-bottom: 16px; }
+  .farmer-sidebar-item { height: 38px; }
+}
+
+@media (max-height: 600px) {
+  .farmer-sidebar-nav > :not(:first-child) { margin-top: 2px; }
+  .farmer-sidebar-item { height: 34px; }
+  .farmer-sidebar-version { padding-top: 4px; }
+}
+
+@media (max-height: 500px) {
+  .farmer-sidebar-brand { padding-bottom: 8px; }
+  .farmer-sidebar-nav > :not(:first-child) { margin-top: 0; }
+  .farmer-sidebar-item { height: 29px; font-size: 12px; }
+  .farmer-sidebar-item svg { width: 16px; height: 16px; }
+  .farmer-sidebar-version { font-size: 10px; }
+}
+
+@media (max-height: 360px) {
+  .farmer-sidebar-version { display: none; }
+}
+
+@media (max-height: 400px) {
+  #farmer-sidebar { padding-top: 6px; padding-bottom: 4px; }
+  .farmer-sidebar-brand { padding-bottom: 4px; }
+  .farmer-sidebar-brand > div:first-child { width: 30px; height: 30px; }
+  .farmer-sidebar-brand p:first-child { font-size: 16px; }
+  .farmer-sidebar-item { height: 23px; }
+  .farmer-sidebar-version { padding-top: 0; }
+}

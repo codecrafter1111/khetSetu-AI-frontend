@@ -1,0 +1,7 @@
+import { Activity, ArrowRight } from 'lucide-react'
+import Card from '../../../../components/ui/Card'
+import { farmActivities } from '../data/myFarm.mock'
+
+export default function FarmActivityTimeline() {
+  return <Card className="min-w-0 p-3.5 xl:min-h-[255px] xl:flex xl:flex-col xl:justify-between"><div className="flex items-center justify-between gap-1"><h2 className="flex items-center gap-2 text-sm font-bold text-slate-900"><Activity className="size-6 text-emerald-700" />Farm Activity Timeline</h2><span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-800">View All <ArrowRight className="size-3.5" /></span></div><ol className="mt-3 space-y-2 xl:flex xl:flex-1 xl:flex-col xl:justify-around xl:space-y-0">{farmActivities.map((activity, index) => <li key={activity.date} className="grid grid-cols-[15px_76px_10px_minmax(0,1fr)] items-start gap-1 text-[10px]"><span className="relative flex justify-center pt-1">{index < farmActivities.length - 1 && <span className="absolute left-1/2 top-2 h-8 w-px xl:h-12 bg-slate-200" />}<span className={`relative size-2 rounded-full ${index === 0 ? 'bg-green-600' : 'bg-slate-400'}`} /></span><span className="text-slate-500">{activity.date}</span><span className="mt-1 size-2 rounded-full bg-emerald-600" /><span className="min-w-0"><strong className="block truncate text-[11px] leading-tight text-slate-900">{activity.title}</strong><span className="block truncate text-slate-500">{activity.description}</span></span></li>)}</ol></Card>
+}

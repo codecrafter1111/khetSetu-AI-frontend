@@ -1,0 +1,8 @@
+import { ExternalLink, Truck } from 'lucide-react'
+import Card from '../../../../components/ui/Card'
+import { deliveryPartner } from '../data/orders.mock'
+
+export default function DeliveryPartnerCard({ order }) {
+  const assigned = Boolean(order?.trackingId)
+  return <Card className="p-3"><h2 className="mb-2 flex items-center gap-2 text-base font-bold text-slate-900"><Truck className="size-6 fill-emerald-800 text-emerald-800" />Delivery Partner</h2><div className="min-h-[125px] rounded-lg border border-slate-200 p-2"><div className="flex items-start gap-2"><span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-lg bg-slate-900 text-lg font-black text-white">D</span><div className="min-w-0 flex-1"><p className="text-sm font-semibold text-slate-900">{deliveryPartner.name}</p><p className="text-[11px] text-slate-500">{deliveryPartner.subtitle}</p></div><span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${assigned ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{assigned ? 'Assigned' : 'Not assigned'}</span></div><div className="mt-1 flex flex-wrap items-end justify-between gap-2"><div className="text-[11px] text-slate-600"><p>Tracking ID&nbsp; : &nbsp;<strong className="text-slate-900">{order?.trackingId || 'Pending assignment'}</strong></p><p>Contact No. : &nbsp;<strong className="text-slate-900">{deliveryPartner.contactNumber}</strong></p></div><button type="button" disabled={!assigned} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-medium text-slate-700 disabled:opacity-50">Track on Delhivery <ExternalLink className="size-3" /></button></div></div></Card>
+}
