@@ -1,0 +1,10 @@
+import { EllipsisVertical, Leaf } from 'lucide-react'
+import ProductBadge from './ProductBadge'
+import ProductImage from './ProductImage'
+
+export default function ProductMobileCard({ product, selected, onToggle, onOpen }) {
+  return <article role="button" tabIndex={0} onClick={onOpen} onKeyDown={event => { if (event.key === 'Enter') onOpen() }} className="cursor-pointer rounded-xl border border-slate-200 p-3 transition hover:border-emerald-300 hover:bg-emerald-50/50">
+    <div className="flex items-start gap-3"><input type="checkbox" checked={selected} onClick={event => event.stopPropagation()} onChange={() => onToggle(product.id)} aria-label={`Select ${product.name}`} className="mt-3 size-4 accent-emerald-700" /><ProductImage product={product} className="size-12" /><div className="min-w-0 flex-1"><h3 className="text-sm font-semibold text-slate-900">{product.name}</h3><p className="text-xs text-slate-500">{product.packageSize}</p></div><button type="button" onClick={event => event.stopPropagation()} aria-label={`More actions for ${product.name}`} className="rounded-lg p-1 text-slate-700"><EllipsisVertical className="size-4" /></button></div>
+    <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs"><div><p className="text-slate-500">Category</p><ProductBadge kind="category" value={product.category} /></div><div><p className="text-slate-500">Quantity</p><p className="font-medium">{product.quantity} {product.quantityUnit}</p></div><div><p className="text-slate-500">Unit Price</p><p className="font-semibold">₹ {product.unitPrice} / {product.priceUnit}</p></div><div><p className="text-slate-500">Stock</p><ProductBadge kind="stock" value={product.stockStatus} /></div><div><p className="text-slate-500">Batch ID</p><p className="flex items-center gap-1 whitespace-nowrap text-slate-700"><Leaf className="size-3 text-emerald-700" />{product.batchId}</p></div><div><p className="text-slate-500">Listing</p><ProductBadge kind="listing" value={product.listingStatus} /></div></div>
+  </article>
+}

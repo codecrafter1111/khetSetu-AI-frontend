@@ -1,0 +1,9 @@
+import { MapPin } from 'lucide-react'
+import Card from '../../../../components/ui/Card'
+import { regionDemand } from '../data/priceInsights.mock'
+
+const indiaShape = 'polygon(42% 0%,52% 5%,58% 12%,67% 16%,66% 25%,75% 31%,82% 37%,72% 46%,78% 54%,69% 57%,64% 69%,56% 78%,49% 94%,42% 100%,34% 85%,29% 75%,21% 70%,19% 59%,9% 53%,12% 45%,4% 39%,11% 32%,18% 30%,23% 22%,32% 20%,35% 12%)'
+
+export default function DemandByRegion() {
+  return <Card className="min-w-0 p-3 xl:min-h-[220px] xl:flex xl:flex-col xl:justify-between"><h2 className="flex items-center gap-2 text-sm font-bold text-slate-900"><MapPin className="size-6 fill-emerald-800 text-emerald-800" />Demand by Region (Wheat)</h2><p className="ml-8 text-[11px] text-slate-500">Top regions with highest demand this month.</p><div className="mt-1 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center"><div role="img" aria-label="Simplified India map highlighting demand regions" className="relative mx-auto h-[150px] w-[135px] shrink-0 sm:mx-0"><div className="absolute inset-0 overflow-hidden bg-emerald-200" style={{ clipPath: indiaShape }}><div className="absolute left-[29%] top-[22%] h-8 w-7 rotate-12 rounded-md bg-emerald-800/90" /><div className="absolute left-[41%] top-[40%] h-9 w-8 -rotate-12 rounded-md bg-emerald-600/80" /><div className="absolute left-[21%] top-[43%] size-5 rounded-full bg-emerald-500/75" /></div></div><div className="min-w-0 flex-1 space-y-1">{regionDemand.map(region => <div key={region.name} className="grid grid-cols-[minmax(84px,1fr)_28px_minmax(60px,1.1fr)] items-center gap-1 text-[10px]"><span className="truncate text-slate-600">{region.name}</span><strong className="text-slate-900">{region.percent}%</strong><span className="h-3 overflow-hidden rounded-sm bg-slate-100"><span className="block h-full rounded-sm bg-emerald-700" style={{ width: `${(region.percent / 32) * 100}%`, opacity: 0.35 + region.percent / 50 }} /></span></div>)}</div></div></Card>
+}

@@ -15,5 +15,5 @@ export default function FarmerLayout() {
     return () => window.removeEventListener('keydown', closeOnEscape)
   }, [menuOpen])
 
-  return <div className="min-h-screen bg-[#f5f9f7]"><FarmerSidebar open={menuOpen} onClose={() => setOpenForPath(null)} /><div className="lg:pl-[238px]"><FarmerTopNavbar onMenu={() => setOpenForPath(location.pathname)} menuOpen={menuOpen} /><main id="farmer-main"><Outlet /></main></div></div>
+  return <div className="min-h-screen bg-[#f5f9f7]"><FarmerSidebar open={menuOpen} onClose={() => setOpenForPath(null)} /><div className="lg:pl-[238px]"><FarmerTopNavbar onMenu={() => setOpenForPath(location.pathname)} menuOpen={menuOpen} /><main id="farmer-main" className="min-h-[calc(100dvh-73px)]"><Outlet /></main></div></div>
 }
