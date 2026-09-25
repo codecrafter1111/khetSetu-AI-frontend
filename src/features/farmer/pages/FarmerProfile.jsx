@@ -13,7 +13,9 @@ import '../profile/profile.css'
 
 const emptyProfile = { fullName: '', mobileNumber: '', email: '', preferredLanguage: '', state: '', district: '', village: '', farmingExperience: '', shortBio: '', profileImage: '' }
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const mobilePattern = /^(?:\+91\s?)?[6-9]\d{4}\s?\d{5}$/
+
+// FIXED: More flexible mobile pattern to avoid false validation blocks
+const mobilePattern = /^(?:\+91[\-\s]?)?[6-9]\d{9}$/
 
 function validateProfile(profile) {
   const errors = {}
@@ -169,7 +171,12 @@ export default function FarmerProfile() {
 }
 
 function ProfileLoading() {
-  return <div className="profile-loading" aria-label="Loading profile"><div /><div><i /><i /><i /><i /></div></div>
+  return (
+    <div className="profile-loading flex flex-col items-center justify-center p-12 space-y-4" aria-label="Loading profile">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600" />
+      <div className="text-sm font-medium text-slate-500">Loading your profile information...</div>
+    </div>
+  )
 }
 
 function ProfileError({ message, onRetry }) {
