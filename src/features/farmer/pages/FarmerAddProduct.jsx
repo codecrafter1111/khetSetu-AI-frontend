@@ -1,16 +1,18 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../farmerProfile/productapi";
 import {
-  BarChart3, Box, Camera, CheckCircle2, ChevronRight, Eye,
-  FileText, Gift, Leaf, MapPin, PackageCheck, Save, ShieldCheck,
-  Star, Truck, Upload, X, Loader2, AlertCircle, Package, Tag,
-  DollarSign, Percent, Layers, UploadCloud
+  BarChart3, Box, Camera, CheckCircle2, Eye,
+  FileText, Gift, Leaf, Star, Truck, Upload, X, Loader2, AlertCircle,
+  Package, Tag, DollarSign, Percent, Layers, UploadCloud, ShieldCheck, Save,
+  CalendarClock
 } from "lucide-react";
 import FarmerPageHero from "../components/FarmerPageHero";
 import ProductImage from "../products/components/ProductImage";
 import "../products/add-product.css";
 
+// Keys that mirror the backend ProductSerializer's writable fields exactly.
+// Keeping this in one place avoids silently drifting from the API contract.
 const emptyForm = {
   name: "",
   brand: "",
@@ -20,6 +22,7 @@ const emptyForm = {
   package_unit: "g",
   price_inr: "",
   offer: 17,
+  expiry_date: "",
   image: null,
 };
 
@@ -46,16 +49,21 @@ function Stepper() {
   );
 }
 
-function SectionTitle({ icon: Icon, title, subtitle }) {
-  return (
-    <header className="add-section-title">
-      <Icon />
-      <div>
-        <h2>{title}</h2>
-        <p>{subtitle}</p>
-      </div>
-    </header>
-  );
+// Formats a Date (or ISO string) into the "yyyy-MM-ddTHH:mm" shape that
+// <input type="datetime-local"> requires. Returns "" for anything falsy/invalid.
+function toDatetimeLocalValue(value) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+// Smallest allowed value for the expiry input — "now" — so the browser's
+// native picker can't offer a past date. Backend still re-validates this.
+function minExpiryValue() {
+  const d = new Date(Date.now() + 5 * 60 * 1000); // 5-min buffer from "now"
+  return toDatetimeLocalValue(d);
 }
 
 export default function FarmerAddProduct() {
@@ -68,11 +76,13 @@ export default function FarmerAddProduct() {
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [toast, setToast] = useState("");
   const [highlight, setHighlight] = useState(false);
 
   useEffect(() => {
     loadCategory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -86,6 +96,7 @@ export default function FarmerAddProduct() {
         package_unit: editProduct.package_unit || "g",
         price_inr: editProduct.price_inr || "",
         offer: editProduct.offer ?? 17,
+        expiry_date: toDatetimeLocalValue(editProduct.expiry_date),
         image: null,
       });
       setImagePreview(editProduct.image || null);
@@ -97,10 +108,18 @@ export default function FarmerAddProduct() {
 
   const loadCategory = async () => {
     try {
-      const res = await api.get("categories/");
+      // Root urls.py: path('Products/', include('Products.urls'))
+      // App urls.py:  path('categories/', ...)
+      // => full path is "Products/categories/"
+      const res = await api.get("Products/categories/");
       setCategories(res.data);
     } catch (err) {
       console.error("Failed to load categories", err);
+      if (!err.response) {
+        flash("Cannot reach the server. Is the backend running?");
+      } else {
+        flash("Could not load categories. Please refresh the page.");
+      }
     }
   };
 
@@ -108,10 +127,28 @@ export default function FarmerAddProduct() {
     const { name, value, files } = e.target;
     if (files && files[0]) {
       const file = files[0];
+
+      if (!file.type.startsWith("image/")) {
+        flash("Please upload a valid image file.");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        flash("Image must be under 5MB.");
+        return;
+      }
+
       setForm((prev) => ({ ...prev, [name]: file }));
       setImagePreview(URL.createObjectURL(file));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
+    }
+
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
     }
   };
 
@@ -132,35 +169,112 @@ export default function FarmerAddProduct() {
   };
 
   const handleDraft = () => {
-    localStorage.setItem("khetsetu-product-draft", JSON.stringify(form));
+    const { image, ...draftSafe } = form; // File objects can't be JSON-serialized
+    localStorage.setItem("khetsetu-product-draft", JSON.stringify(draftSafe));
     flash("Product saved as draft successfully");
+  };
+
+  // Mirrors the backend's validate_* rules so the user sees the problem
+  // before a network round-trip, not just after a 400 comes back.
+  const validateClientSide = () => {
+    const errs = {};
+
+    if (!form.name.trim()) errs.name = "Product title is required.";
+    if (!form.category) errs.category = "Please select a category.";
+
+    if (form.price_inr === "" || Number(form.price_inr) <= 0) {
+      errs.price_inr = "Enter a valid price.";
+    }
+
+    if (form.stock !== "" && Number(form.stock) < 0) {
+      errs.stock = "Stock cannot be negative.";
+    }
+
+    if (form.offer !== "" && (Number(form.offer) < 0 || Number(form.offer) > 100)) {
+      errs.offer = "Discount must be between 0 and 100.";
+    }
+
+    if (!form.expiry_date) {
+      errs.expiry_date = "Expiry date is required.";
+    } else if (new Date(form.expiry_date) <= new Date()) {
+      errs.expiry_date = "Expiry date must be in the future.";
+    }
+
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
   };
 
   const submit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
 
+    if (!validateClientSide()) {
+      flash("Please fix the highlighted fields.");
+      return;
+    }
+
+    setLoading(true);
     try {
       const data = new FormData();
+
       Object.keys(form).forEach((k) => {
+        if (k === "image" && !form[k]) return;
+        if (k === "expiry_date" && form[k]) {
+          // datetime-local has no timezone; convert to a full ISO string
+          // so it matches the backend's DateTimeField expectations.
+          data.append(k, new Date(form[k]).toISOString());
+          return;
+        }
         if (form[k] !== null && form[k] !== "") {
           data.append(k, form[k]);
         }
       });
 
       if (editProduct) {
-        await api.patch(`products/management/${editProduct.uuid}/`, data);
+        // Root urls.py: 'Products/' prefix + app's "products/management/<uuid>/"
+        await api.patch(`Products/products/management/${editProduct.uuid}/`, data);
         flash("Product updated successfully!");
       } else {
-        await api.post("products/management/", data);
+        await api.post("Products/products/management/", data);
         flash("Product published successfully!");
       }
 
       window.setTimeout(() => navigate("/farmer/products"), 1000);
     } catch (err) {
-      console.error("Error saving product:", err);
-      const errorMsg = err.response?.data?.message || "Failed to save product. Please check your fields.";
+      // No `err.response` means the request never reached the server:
+      // wrong host/port, backend not running, CORS block, or network
+      // down. This is a different problem from a 400 validation error
+      // and needs a different message — "check your fields" is wrong here.
+      if (!err.response) {
+        console.error("Network/connection error saving product:", err.message);
+        const msg = "Cannot connect to the server. Please check that the backend is running and try again.";
+        setError(msg);
+        flash(msg);
+        return;
+      }
+
+      console.error("Error saving product details:", err.response.data);
+
+      const errData = err.response.data;
+      let errorMsg = "Failed to save product. Please check your fields.";
+
+      if (typeof errData === "object" && errData !== null) {
+        setFieldErrors((prev) => ({
+          ...prev,
+          ...Object.fromEntries(
+            Object.entries(errData).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])
+          ),
+        }));
+
+        const firstKey = Object.keys(errData)[0];
+        if (firstKey) {
+          const val = errData[firstKey];
+          errorMsg = `${firstKey}: ${Array.isArray(val) ? val[0] : val}`;
+        }
+      } else if (typeof errData === "string") {
+        errorMsg = errData;
+      }
+
       setError(errorMsg);
       flash(errorMsg);
     } finally {
@@ -170,16 +284,16 @@ export default function FarmerAddProduct() {
 
   return (
     <>
-      <FarmerPageHero 
-        title={editProduct ? "Edit Product" : "Add New Product"} 
-        subtitle="List your fresh farm produce for sale and reach more buyers." 
-        icon={Leaf} 
-        iconPlacement="end" 
+      <FarmerPageHero
+        title={editProduct ? "Edit Product" : "Add New Product"}
+        subtitle="List your fresh farm produce for sale and reach more buyers."
+        icon={Leaf}
+        iconPlacement="end"
       />
       <div className="add-product-page">
         <Stepper />
         <div className="add-product-layout">
-          
+
           {/* Main Form Section */}
           <div className="add-product-form bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
@@ -200,7 +314,7 @@ export default function FarmerAddProduct() {
               </div>
             )}
 
-            <form onSubmit={submit} className="space-y-4">
+            <form onSubmit={submit} className="space-y-4" noValidate>
               {/* Product Title */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -209,14 +323,16 @@ export default function FarmerAddProduct() {
                 <div className="relative">
                   <Package size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
-                    required
                     name="name"
                     value={form.name}
                     onChange={change}
                     placeholder="e.g. Organic Almond Milk"
-                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition-all"
+                    className={`w-full pl-9 pr-3 py-2 bg-slate-50 border rounded-xl text-sm focus:bg-white focus:outline-none transition-all ${
+                      fieldErrors.name ? "border-rose-400 focus:border-rose-500" : "border-slate-200 focus:border-emerald-500"
+                    }`}
                   />
                 </div>
+                {fieldErrors.name && <p className="text-[11px] text-rose-600 mt-1">{fieldErrors.name}</p>}
               </div>
 
               {/* Brand & Category Grid */}
@@ -240,11 +356,12 @@ export default function FarmerAddProduct() {
                     Category <span className="text-rose-500">*</span>
                   </label>
                   <select
-                    required
                     name="category"
                     value={form.category}
                     onChange={change}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition-all text-slate-700"
+                    className={`w-full px-3 py-2 bg-slate-50 border rounded-xl text-sm focus:bg-white focus:outline-none transition-all text-slate-700 ${
+                      fieldErrors.category ? "border-rose-400 focus:border-rose-500" : "border-slate-200 focus:border-emerald-500"
+                    }`}
                   >
                     <option value="">Select Category</option>
                     {categories.map((c) => (
@@ -253,6 +370,7 @@ export default function FarmerAddProduct() {
                       </option>
                     ))}
                   </select>
+                  {fieldErrors.category && <p className="text-[11px] text-rose-600 mt-1">{fieldErrors.category}</p>}
                 </div>
               </div>
 
@@ -265,15 +383,19 @@ export default function FarmerAddProduct() {
                   <div className="relative">
                     <DollarSign size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
-                      required
                       type="number"
+                      min="0"
+                      step="0.01"
                       name="price_inr"
                       value={form.price_inr}
                       onChange={change}
                       placeholder="0.00"
-                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition-all"
+                      className={`w-full pl-9 pr-3 py-2 bg-slate-50 border rounded-xl text-sm focus:bg-white focus:outline-none transition-all ${
+                        fieldErrors.price_inr ? "border-rose-400 focus:border-rose-500" : "border-slate-200 focus:border-emerald-500"
+                      }`}
                     />
                   </div>
+                  {fieldErrors.price_inr && <p className="text-[11px] text-rose-600 mt-1">{fieldErrors.price_inr}</p>}
                 </div>
 
                 <div>
@@ -282,13 +404,18 @@ export default function FarmerAddProduct() {
                     <Percent size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
                       type="number"
+                      min="0"
+                      max="100"
                       name="offer"
                       value={form.offer}
                       onChange={change}
                       placeholder="17"
-                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition-all"
+                      className={`w-full pl-9 pr-3 py-2 bg-slate-50 border rounded-xl text-sm focus:bg-white focus:outline-none transition-all ${
+                        fieldErrors.offer ? "border-rose-400 focus:border-rose-500" : "border-slate-200 focus:border-emerald-500"
+                      }`}
                     />
                   </div>
+                  {fieldErrors.offer && <p className="text-[11px] text-rose-600 mt-1">{fieldErrors.offer}</p>}
                 </div>
               </div>
 
@@ -298,6 +425,7 @@ export default function FarmerAddProduct() {
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Pkg Size</label>
                   <input
                     type="number"
+                    min="0"
                     name="package_quantity"
                     value={form.package_quantity}
                     onChange={change}
@@ -332,13 +460,42 @@ export default function FarmerAddProduct() {
                   <Layers size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="number"
+                    min="0"
                     name="stock"
                     value={form.stock}
                     onChange={change}
                     placeholder="30"
-                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition-all"
+                    className={`w-full pl-9 pr-3 py-2 bg-slate-50 border rounded-xl text-sm focus:bg-white focus:outline-none transition-all ${
+                      fieldErrors.stock ? "border-rose-400 focus:border-rose-500" : "border-slate-200 focus:border-emerald-500"
+                    }`}
                   />
                 </div>
+                {fieldErrors.stock && <p className="text-[11px] text-rose-600 mt-1">{fieldErrors.stock}</p>}
+              </div>
+
+              {/* Expiry Date — mandatory per backend serializer */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Expiry Date <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <CalendarClock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="datetime-local"
+                    name="expiry_date"
+                    value={form.expiry_date}
+                    min={minExpiryValue()}
+                    onChange={change}
+                    className={`w-full pl-9 pr-3 py-2 bg-slate-50 border rounded-xl text-sm focus:bg-white focus:outline-none transition-all ${
+                      fieldErrors.expiry_date ? "border-rose-400 focus:border-rose-500" : "border-slate-200 focus:border-emerald-500"
+                    }`}
+                  />
+                </div>
+                {fieldErrors.expiry_date ? (
+                  <p className="text-[11px] text-rose-600 mt-1">{fieldErrors.expiry_date}</p>
+                ) : (
+                  <p className="text-[11px] text-slate-400 mt-1">Required for all farm produce listings.</p>
+                )}
               </div>
 
               {/* Image Upload Area */}
@@ -422,7 +579,7 @@ export default function FarmerAddProduct() {
             </form>
           </div>
 
-          {/* Right Rail Panel (Preview & Insights) */}
+          {/* Right Rail Panel */}
           <aside className="add-product-rail">
             <section className={`add-rail-panel live-preview ${highlight ? 'highlight' : ''}`}>
               <header>
@@ -439,6 +596,11 @@ export default function FarmerAddProduct() {
                   <p className="text-xs text-slate-500 mt-0.5">Brand: {form.brand || 'N/A'}</p>
                   <strong className="text-emerald-600 text-sm block mt-2">₹ {form.price_inr || '0.00'}</strong>
                   <small className="text-xs text-slate-400 block mt-1"><Box /> Stock: {form.stock} units</small>
+                  {form.expiry_date && (
+                    <small className="text-xs text-slate-400 block mt-1">
+                      <CalendarClock size={12} /> Expires: {new Date(form.expiry_date).toLocaleString()}
+                    </small>
+                  )}
                 </div>
               </article>
             </section>
@@ -451,23 +613,6 @@ export default function FarmerAddProduct() {
                 <small className="text-xs text-slate-500">Similar items average market price</small>
                 <strong className="text-sm font-bold block mt-1">₹ 150 – ₹ 500</strong>
                 <span className="text-xs text-emerald-600 font-medium block mt-1">↗ Good competitive range</span>
-              </div>
-            </section>
-
-            <section className="add-rail-panel important-components">
-              <header>
-                <h2><Star />Guidelines</h2>
-              </header>
-              <div className="p-3 bg-white rounded-xl border border-slate-100 space-y-2">
-                {components.map(({ icon: Icon, title, text }) => (
-                  <article key={title} className="flex items-start gap-2.5 text-xs">
-                    <span className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg"><Icon size={14} /></span>
-                    <div>
-                      <strong className="block text-slate-800">{title}</strong>
-                      <small className="text-slate-400">{text}</small>
-                    </div>
-                  </article>
-                ))}
               </div>
             </section>
           </aside>
