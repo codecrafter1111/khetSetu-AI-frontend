@@ -1,0 +1,8 @@
+import { Search } from 'lucide-react'
+import { inventoryCategories } from '../../data/inventory.mock'
+
+const field = 'min-h-10 rounded-lg border border-[#d8e4ee] bg-white px-3 text-[13px] text-[#314363] outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100'
+
+export default function InventoryFilters({ query, category, status, onQuery, onCategory, onStatus, onReset }) {
+  return <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(190px,1fr)_minmax(145px,180px)_minmax(145px,180px)_90px]"><label className="relative min-w-0"><span className="sr-only">Search products</span><Search size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#627493]" /><input value={query} onChange={event => onQuery(event.target.value)} placeholder="Search products by name, SKU, or brand..." className={`${field} w-full pl-10`} /></label><label className="min-w-0"><span className="sr-only">Product category</span><select value={category} onChange={event => onCategory(event.target.value)} className={`${field} w-full`}><option value="">All Categories</option>{inventoryCategories.map(item => <option key={item}>{item}</option>)}</select></label><label className="min-w-0"><span className="sr-only">Stock status</span><select value={status} onChange={event => onStatus(event.target.value)} className={`${field} w-full`}><option value="">All Stock Status</option><option value="in">In Stock</option><option value="low">Low Stock</option><option value="out">Out of Stock</option></select></label><button type="button" onClick={onReset} className={`${field} font-medium hover:bg-emerald-50`}>Reset</button></div>
+}
