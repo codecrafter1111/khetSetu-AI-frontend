@@ -1,4 +1,8 @@
 export const routes = {
+  auth: {
+    login: '/login',
+    signup: '/signup',
+  },
   consumer: {
     dashboard: '/consumer/dashboard',
     products: '/consumer/products',
