@@ -35,4 +35,16 @@ export const routes = {
     profile: '/delivery/profile',
     help: '/delivery/help',
   },
+  shopkeeper: {
+    dashboard: '/shopkeeper/dashboard',
+    store: '/shopkeeper/my-store',
+    inventory: '/shopkeeper/inventory',
+    addProduct: '/shopkeeper/inventory/new',
+    requests: '/shopkeeper/farmer-requests',
+    nearbyFarmers: '/shopkeeper/nearby-farmers',
+    sales: '/shopkeeper/sales',
+    notifications: '/shopkeeper/notifications',
+    profile: '/shopkeeper/profile',
+    help: '/shopkeeper/help',
+  },
 }

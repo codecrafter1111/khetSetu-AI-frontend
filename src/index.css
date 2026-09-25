@@ -51,6 +51,7 @@
     background-image: linear-gradient(rgba(246, 255, 248, .91), rgba(246, 255, 248, .84)), url('/images/dashboard/farmer-hero.png');
   }
   .consumer-page .consumer-hero::before { display: none; }
+}
 
 @media (max-height: 1050px) {
   .farmer-sidebar-promo { display: none; }

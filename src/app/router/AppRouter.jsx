@@ -2,11 +2,9 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { routes } from '../../config/routes'
 import { farmerRoutes } from './FarmerRoutes'
 import { consumerRoutes } from './ConsumerRoutes'
-
-export default function AppRouter() {
-  return <Routes>{farmerRoutes}{consumerRoutes}<Route path="*" element={<Navigate to={routes.farmer.dashboard} replace />} /></Routes>
 import { deliveryRoutes } from './DeliveryRoutes'
+import { shopkeeperRoutes } from './ShopkeeperRoutes'
 
 export default function AppRouter() {
-  return <Routes>{farmerRoutes}{deliveryRoutes}<Route path="*" element={<Navigate to={routes.farmer.dashboard} replace />} /></Routes>
+  return <Routes>{farmerRoutes}{consumerRoutes}{deliveryRoutes}{shopkeeperRoutes}<Route path="*" element={<Navigate to={routes.farmer.dashboard} replace />} /></Routes>
 }
