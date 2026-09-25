@@ -1,4 +1,8 @@
 export const routes = {
+  auth: {
+    login: '/login',
+    signup: '/signup',
+  },
   consumer: {
     dashboard: '/consumer/dashboard',
     products: '/consumer/products',
@@ -24,6 +28,9 @@ export const routes = {
     earnings: '/farmer/earnings',
     messages: '/farmer/messages',
     profile: '/farmer/profile',
+    profileFarmBasics: '/farmer/profile/farm-basics',
+    profileVerification: '/farmer/profile/verification',
+    profileComplete: '/farmer/profile/complete',
     help: '/farmer/help',
   },
   delivery: {
