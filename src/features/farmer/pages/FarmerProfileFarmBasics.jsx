@@ -11,11 +11,11 @@ import FarmPreview from '../profile/components/FarmPreview'
 import ProfileField from '../profile/components/ProfileField'
 import ProfileStepper from '../profile/components/ProfileStepper'
 import { farmSelectOptions, sustainabilityOptions } from '../profile/data/farmOptions'
-import { getFarmDetails, saveFarmDraft, updateFarmDetails, uploadFarmPhotos } from '../profile/services/farmDetails.service'
+import { getFarmDetails, saveFarmDraft, updateFarmDetails, uploadFarmPhotos } from '../farmDetails/service'
 import '../profile/profile.css'
 import '../profile/farm-details.css'
 
-const emptyFarm = { farmName: '', farmOwner: '', village: '', district: '', state: '', pinCode: '', location: { address: '', latitude: '', longitude: '' }, totalArea: '', areaUnit: '', soilType: '', farmingMethod: '', irrigationType: '', waterSource: '', crops: [], photos: [], sustainabilityPractices: [], otherPractice: '' }
+const emptyFarm = { farmName: '', farmOwner: '', village: '', district: '', state: '', pinCode: '', location: { address: '', latitude: '', longitude: '' }, totalArea: '', areaUnit: 'Acres', soilType: '', farmingMethod: '', irrigationType: '', waterSource: '', crops: [], photos: [], sustainabilityPractices: [], otherPractice: '' }
 
 function validate(farm) {
   const errors = {}
@@ -59,6 +59,7 @@ export default function FarmerProfileFarmBasics() {
     getFarmDetails().then((data) => { if (active) setFarm(data) }).catch(() => { if (active) setLoadError('We could not load your farm details. Please try again.') }).finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [])
+
   useEffect(() => {
     if (!toast) return undefined
     const timer = window.setTimeout(() => setToast(''), 2800)
@@ -70,13 +71,14 @@ export default function FarmerProfileFarmBasics() {
     setFarm((current) => ({ ...current, [name]: name === 'pinCode' ? value.replace(/\D/g, '').slice(0, 6) : value }))
     setErrors((current) => ({ ...current, [name]: '' }))
   }
+
   const updateLocation = (location) => { setFarm((current) => ({ ...current, location })); setErrors((current) => ({ ...current, location: '' })) }
   const updateCrops = (crops) => { setFarm((current) => ({ ...current, crops })); setErrors((current) => ({ ...current, crops: '' })) }
   const togglePractice = (practice) => setFarm((current) => ({ ...current, sustainabilityPractices: current.sustainabilityPractices.includes(practice) ? current.sustainabilityPractices.filter((item) => item !== practice) : [...current.sustainabilityPractices, practice] }))
 
   const addPhotos = async (files) => {
     setUploading(true); setPhotoError(''); setUploadProgress(0)
-    try { const photos = await uploadFarmPhotos(files, farm.photos.length, setUploadProgress); setFarm((current) => ({ ...current, photos: [...current.photos, ...photos] })); setToast('Farm photos uploaded') } catch (error) { setPhotoError(error.message) } finally { setUploading(false) }
+    try { const photos = await uploadFarmPhotos(files, farm.photos.length, setUploadProgress); setFarm((current) => ({ ...current, photos: [...current.photos, ...photos] })); setToast('Farm photos uploaded') } catch (error) { setPhotoError(error.message || 'Error uploading photos') } finally { setUploading(false) }
   }
 
   const save = async (mode) => {

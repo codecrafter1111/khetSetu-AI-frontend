@@ -1,0 +1,30 @@
+export const requestStats = [
+  { label: 'Open Requests', value: '24', trend: '↑ 12%', detail: '+6 since yesterday', icon: 'users', tone: 'green' },
+  { label: 'High Priority', value: '7', trend: '↑ 40%', detail: 'Require immediate attention', icon: 'alert', tone: 'red' },
+  { label: 'Responded Today', value: '18', trend: '↑ 28%', detail: 'Out of 24 requests', icon: 'message', tone: 'blue' },
+  { label: 'Avg Response Time', value: '2.4 hours', trend: '↓ 35%', detail: 'Faster than last week', icon: 'clock', tone: 'amber' },
+]
+
+export const farmerRequests = [
+  { id: 'ramesh', name: 'Ramesh Yadav', avatarTile: 5, acreage: '2 acres', crop: 'Wheat', cropIcon: '🌿', issue: 'Leaf spot disease in wheat', issueDetail: 'Leaf spot disease, yellow patches on leaves.', product: 'Mancozeb 75% WP', productDetail: 'Fungicide for leaf spot control', location: 'Bithoor, Kanpur', fullLocation: 'Bithoor, Kanpur, Uttar Pradesh', priority: 'High', time: '2 hours ago', status: 'Pending', phone: '+919876543210', stock: '50 packs available', recommendation: { product: 'Mancozeb 75% WP Fungicide', dosage: '2.5 g per litre of water', application: 'Spray on affected leaves', repeat: 'After 10–12 days', note: 'Use in early stage for better control.' } },
+  { id: 'sunita', name: 'Sunita Devi', avatarTile: 0, acreage: '1.5 acres', crop: 'Paddy', cropIcon: '🌾', issue: 'Yellowing leaves in paddy', issueDetail: 'Yellowing leaves are spreading through the paddy field.', product: 'Ferrous Sulphate', productDetail: 'Micronutrient for iron deficiency', location: 'Barra, Kanpur', fullLocation: 'Barra, Kanpur, Uttar Pradesh', priority: 'Medium', time: '4 hours ago', status: 'Pending', phone: '+919876543211', stock: '35 packs available', recommendation: { product: 'Ferrous Sulphate', dosage: '5 g per litre of water', application: 'Spray evenly on foliage', repeat: 'After 7–10 days', note: 'Apply in the morning for best results.' } },
+  { id: 'imran', name: 'Imran Khan', avatarTile: 3, acreage: '3 acres', crop: 'Maize', cropIcon: '🌽', issue: 'Stem borer in maize', issueDetail: 'Stem borer damage is visible in young maize plants.', product: 'Chlorantraniliprole', productDetail: 'Insecticide for stem borer control', location: 'Kalyanpur, Kanpur', fullLocation: 'Kalyanpur, Kanpur, Uttar Pradesh', priority: 'High', time: '5 hours ago', status: 'Pending', phone: '+919876543212', stock: '24 packs available', recommendation: { product: 'Chlorantraniliprole', dosage: '0.4 ml per litre of water', application: 'Apply to the whorl of affected plants', repeat: 'As advised on the product label', note: 'Use protective equipment during application.' } },
+  { id: 'pooja', name: 'Pooja Sharma', avatarTile: 4, acreage: '1 acre', crop: 'Tomato', cropIcon: '🍅', issue: 'Fungal infection in tomato', issueDetail: 'Fungal spots are appearing on tomato leaves.', product: 'Carbendazim', productDetail: 'Fungicide for fungal infection', location: 'Naubasta, Kanpur', fullLocation: 'Naubasta, Kanpur, Uttar Pradesh', priority: 'Medium', time: '6 hours ago', status: 'Pending', phone: '+919876543213', stock: '18 packs available', recommendation: { product: 'Carbendazim', dosage: '1 g per litre of water', application: 'Spray on affected leaves', repeat: 'After 10 days', note: 'Remove heavily infected leaves before spraying.' } },
+  { id: 'mahesh', name: 'Mahesh Patel', avatarTile: 1, acreage: '4 acres', crop: 'Wheat', cropIcon: '🌿', issue: 'Need urea for top dressing', issueDetail: 'The wheat crop needs nitrogen top dressing.', product: 'Urea (46% N)', productDetail: 'Nitrogen fertilizer for top dressing', location: 'Govind Nagar, Kanpur', fullLocation: 'Govind Nagar, Kanpur, Uttar Pradesh', priority: 'Low', time: '8 hours ago', status: 'Pending', phone: '+919876543214', stock: '120 bags available', recommendation: { product: 'Urea (46% N)', dosage: 'As per soil test and crop stage', application: 'Broadcast evenly before irrigation', repeat: 'Follow crop nutrient schedule', note: 'Avoid overapplication.' } },
+  { id: 'savitri', name: 'Savitri Yadav', avatarTile: 0, acreage: '2.5 acres', crop: 'Chilli', cropIcon: '🌶️', issue: 'Aphids in chilli', issueDetail: 'Aphids are visible on tender chilli shoots.', product: 'Imidacloprid', productDetail: 'Insecticide for aphid control', location: 'Panki, Kanpur', fullLocation: 'Panki, Kanpur, Uttar Pradesh', priority: 'Medium', time: '10 hours ago', status: 'Pending', phone: '+919876543215', stock: '4 bottles available', recommendation: { product: 'Imidacloprid', dosage: 'As directed on the label', application: 'Spray affected plants evenly', repeat: 'Observe label interval', note: 'Protect pollinators during application.' } },
+]
+
+export const fulfilledRequests = [
+  { id: 'ajay', name: 'Ajay Singh', avatarTile: 3, acreage: '2 acres', crop: 'Cotton', cropIcon: '🌿', issue: 'Whitefly', product: 'Imidacloprid', location: 'Kanpur', priority: 'Low', time: '1 day ago', status: 'Fulfilled' },
+  { id: 'rekha', name: 'Rekha Devi', avatarTile: 0, acreage: '1 acre', crop: 'Vegetable', cropIcon: '🥬', issue: 'Need DAP', product: 'DAP Fertilizer', location: 'Barra', priority: 'Low', time: '2 days ago', status: 'Fulfilled' },
+  { id: 'deepak', name: 'Deepak Verma', avatarTile: 1, acreage: '3 acres', crop: 'Potato', cropIcon: '🥔', issue: 'Late blight', product: 'Mancozeb 75% WP', location: 'Bithoor', priority: 'Low', time: '3 days ago', status: 'Fulfilled' },
+]
+
+export const requestFeatures = [
+  { title: 'Request Management', detail: 'View, filter and respond to all farmer requests', icon: 'file' },
+  { title: 'Treatment-linked Product Suggestion', detail: 'Get AI-based input recommendations', icon: 'product' },
+  { title: 'Stock Match', detail: 'Check product availability instantly', icon: 'stock' },
+  { title: 'Response Status', detail: 'Track pending, responded and fulfilled requests', icon: 'status' },
+  { title: 'Contact Actions', detail: 'Call or message farmers directly', icon: 'phone' },
+  { title: 'Urgency Tagging', detail: 'Identify high-priority requests quickly', icon: 'alert' },
+]
