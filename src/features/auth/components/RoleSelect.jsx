@@ -1,6 +1,6 @@
 import { ChevronDown, Users } from 'lucide-react'
 
-const roles = ['Farmer', 'Consumer', 'Delivery Partner', 'Shopkeeper', 'Admin']
+const roles = ['seller', 'customer', 'rider', 'admin'];
 
 export default function RoleSelect({ value, onChange, error, id = 'role', label }) {
   return (

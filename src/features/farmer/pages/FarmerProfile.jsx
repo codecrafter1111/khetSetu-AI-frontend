@@ -8,7 +8,7 @@ import ProfileImageUploader from '../profile/components/ProfileImageUploader'
 import ProfileSidebarCards from '../profile/components/ProfileSidebarCards'
 import ProfileStepper from '../profile/components/ProfileStepper'
 import { districts, experienceRanges, languages, states } from '../profile/data/profileOptions'
-import { getFarmerProfile, saveProfileDraft, updateFarmerProfile, uploadProfileImage } from '../profile/services/farmerProfile.service'
+import { getFarmerProfile, saveProfileDraft, updateFarmerProfile, uploadProfileImage } from '../farmerProfile/service'
 import '../profile/profile.css'
 
 const emptyProfile = { fullName: '', mobileNumber: '', email: '', preferredLanguage: '', state: '', district: '', village: '', farmingExperience: '', shortBio: '', profileImage: '' }
@@ -47,7 +47,8 @@ export default function FarmerProfile() {
     setLoading(true)
     setLoadError('')
     try {
-      setProfile(await getFarmerProfile())
+      const data = await getFarmerProfile()
+      setProfile(data)
     } catch {
       setLoadError('We could not load your profile. Please check your connection and try again.')
     } finally {
@@ -63,12 +64,14 @@ export default function FarmerProfile() {
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [])
+
   useEffect(() => {
     if (!dirty) return undefined
     const protectChanges = (event) => { event.preventDefault(); event.returnValue = '' }
     window.addEventListener('beforeunload', protectChanges)
     return () => window.removeEventListener('beforeunload', protectChanges)
   }, [dirty])
+
   useEffect(() => {
     if (!toast) return undefined
     const timer = window.setTimeout(() => setToast(''), 2800)
@@ -93,7 +96,7 @@ export default function FarmerProfile() {
       setDirty(true)
       setToast('Profile photo updated')
     } catch (error) {
-      setUploadError(error.message)
+      setUploadError(error.message || 'Image upload failed')
     } finally {
       setUploading(false)
     }
@@ -129,7 +132,7 @@ export default function FarmerProfile() {
   return <>
     <FarmerPageHero title="Complete Profile" subtitle="Help us know you better. Complete your profile to unlock all features and grow with KhetSetu AI." icon={Leaf} iconPlacement="end" slogan={['Meri Mitti', 'Mera Bhavishya']} />
     <div className="farmer-profile-page">
-      <ProfileStepper />
+      <ProfileStepper activeStep={1} />
       {loading ? <ProfileLoading /> : loadError ? <ProfileError message={loadError} onRetry={loadProfile} /> : (
         <div className="profile-layout">
           <section className="profile-form-card">
