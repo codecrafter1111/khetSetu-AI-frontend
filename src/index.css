@@ -19,6 +19,14 @@
   background-position: var(--tile-x) var(--tile-y);
   background-repeat: no-repeat;
 }
+.consumer-nav-avatar {
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 999px;
+  background: #dff3dd url('/images/consumer/hero.png') 82% 17% / 290% auto no-repeat;
+}
 .consumer-hero {
   background-image: linear-gradient(90deg, rgba(246, 255, 248, .94) 0%, rgba(246, 255, 248, .74) 41%, rgba(246, 255, 248, .10) 78%), url('/images/dashboard/farmer-hero.png');
   background-size: cover;
