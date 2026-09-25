@@ -9,11 +9,14 @@ import ConsumerCart from '../../features/consumer/pages/ConsumerCart'
 import ConsumerPayment from '../../features/consumer/pages/ConsumerPayment'
 import ConsumerFarmPassport from '../../features/consumer/pages/ConsumerFarmPassport'
 import ConsumerOrders from '../../features/consumer/pages/ConsumerOrders'
+import ConsumerProfilePage from '../../features/consumer/profile/pages/ConsumerProfilePage'
+import ConsumerOrderDetails from '../../features/consumer/orders/pages/ConsumerOrderDetails'
+import ConsumerTrackOrder from '../../features/consumer/orders/pages/ConsumerTrackOrder'
 
 const sections = [
   ['subscriptions', 'Subscriptions'],
-  ['wishlist', 'Wishlist'], ['reviews', 'Reviews'],
-  ['profile', 'Profile'], ['help', 'Help'],
+  ['wishlist', 'Wishlist'], ['reviews', 'Reviews'], ['notifications', 'Notifications'],
+  ['profile/addresses', 'Manage Addresses'], ['profile/preferences', 'Preferences'], ['profile/security', 'Security'], ['profile/reviews', 'My Reviews'], ['help', 'Help'],
 ]
 
 export const consumerRoutes = <Route path="/consumer" element={<ConsumerLayout />}>
@@ -25,5 +28,8 @@ export const consumerRoutes = <Route path="/consumer" element={<ConsumerLayout /
   <Route path="checkout/payment" element={<ConsumerPayment />} />
   <Route path="farm-passport" element={<ConsumerFarmPassport />} />
   <Route path="orders" element={<ConsumerOrders />} />
+  <Route path="orders/:orderId" element={<ConsumerOrderDetails />} />
+  <Route path="orders/:orderId/track" element={<ConsumerTrackOrder />} />
+  <Route path="profile" element={<ConsumerProfilePage />} />
   {sections.map(([path, title]) => <Route key={path} path={path} element={<ConsumerSection title={title} />} />)}
 </Route>

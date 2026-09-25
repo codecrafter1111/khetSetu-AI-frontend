@@ -7,13 +7,14 @@ import { useConsumerCommerce } from '../state/useConsumerCommerce'
 import { getConsumerOrders, downloadDemoInvoice } from '../../../services/consumer/orderService'
 import { OrderFilters, OrderStats, OrdersAside, OrdersHero } from '../components/orders/OrdersOverview'
 import { ExpandedOrderCard, OrderDetailsDialog, OrderListItem } from '../components/orders/OrderCards'
+import CancelOrderModal from '../orders/components/CancelOrderModal'
 
 const reorderNames = {
   'Organic Rice': 'Organic Basmati Rice', 'Wild Honey': 'Wild Forest Honey', 'Raw Honey': 'Wild Forest Honey',
   'Fresh Vegetables': 'Fresh Vegetable Basket', 'A2 Cow Milk': 'Fresh Cow Milk',
 }
-const orders = getConsumerOrders()
-const latestDate = new Date(`${orders[0].placedAt}T12:00:00`)
+const initialOrders = getConsumerOrders()
+const latestDate = new Date(`${initialOrders[0].placedAt}T12:00:00`)
 
 function matchesDateRange(order, dateRange) {
   if (dateRange === 'all') return true
@@ -35,12 +36,14 @@ export default function ConsumerOrders() {
   const [selectedId, setSelectedId] = useState('KS8721')
   const [collapsed, setCollapsed] = useState(false)
   const [detailsOrder, setDetailsOrder] = useState(null)
+  const [cancelOrder, setCancelOrder] = useState(null)
+  const [orderList, setOrderList] = useState(() => initialOrders.map((order) => ({ ...order })))
   const [notice, setNotice] = useState('')
-  const counts = useMemo(() => ({ total: orders.length, all: orders.length, active: orders.filter(order => activeOrderStatuses.includes(order.status)).length, delivered: orders.filter(order => order.status === 'delivered').length, cancelled: orders.filter(order => order.status === 'cancelled').length, savings: orders.reduce((sum, order) => sum + order.savings, 0) }), [])
+  const counts = useMemo(() => ({ total: orderList.length, all: orderList.length, active: orderList.filter(order => activeOrderStatuses.includes(order.status)).length, delivered: orderList.filter(order => order.status === 'delivered').length, cancelled: orderList.filter(order => order.status === 'cancelled').length, savings: orderList.reduce((sum, order) => sum + order.savings, 0) }), [orderList])
   const visibleOrders = useMemo(() => {
     const query = search.trim().toLowerCase()
-    return orders.filter(order => matchesStatus(order, filter) && matchesDateRange(order, dateRange) && (!query || `${order.id} ${order.farm} ${order.location} ${order.statusLabel} ${order.summary} ${order.items.map(item => item.name).join(' ')}`.toLowerCase().includes(query)))
-  }, [filter, dateRange, search])
+    return orderList.filter(order => matchesStatus(order, filter) && matchesDateRange(order, dateRange) && (!query || `${order.id} ${order.farm} ${order.location} ${order.statusLabel} ${order.summary} ${order.items.map(item => item.name).join(' ')}`.toLowerCase().includes(query)))
+  }, [filter, dateRange, search, orderList])
   const expandedOrder = collapsed ? null : visibleOrders.find(order => order.id === selectedId) || visibleOrders[0]
 
   useEffect(() => {
@@ -61,16 +64,26 @@ export default function ConsumerOrders() {
     setDetailsOrder(null)
     setNotice(added ? `${added} product${added === 1 ? '' : 's'} added to your cart.${unavailable ? ` ${unavailable} unavailable item${unavailable === 1 ? ' was' : 's were'} skipped.` : ''}` : 'These products are not currently available in the shop.')
   }
-  const track = order => {
-    setSelectedId(order.id)
-    setCollapsed(false)
-    document.getElementById('order-tracking')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  }
   const selectOrder = id => {
     setSelectedId(id)
     setCollapsed(false)
     requestAnimationFrame(() => document.getElementById('orders-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
+  const cancelled = result => {
+    setOrderList(current => current.map(order => order.id === result.orderId ? { ...order, status: 'cancelled', statusLabel: 'Cancelled', statusDate: 'Cancelled just now', cancellation: { ...order.cancellation, canCancel: false } } : order))
+    setDetailsOrder(current => current?.id === result.orderId ? null : current)
+    setCancelOrder(null)
+    setNotice(`Order #${result.orderId} cancelled successfully.`)
+  }
 
-  return <div className="consumer-page"><OrdersHero /><div className="consumer-page-content space-y-5"><OrderStats values={counts} /><div className="grid items-start gap-5 min-[1400px]:grid-cols-[minmax(0,1fr)_minmax(290px,320px)]"><section id="orders-list" className="min-w-0 rounded-xl border border-[#dfe8ef] bg-white shadow-sm"><OrderFilters filter={filter} onFilter={value => { setFilter(value); setCollapsed(false) }} counts={counts} dateRange={dateRange} onDateRange={value => { setDateRange(value); setCollapsed(false) }} search={search} onSearch={value => { setSearch(value); setCollapsed(false) }} /><div className="space-y-3 p-3 sm:p-4">{expandedOrder && <ExpandedOrderCard order={expandedOrder} onCollapse={() => setCollapsed(true)} onTrack={track} onDetails={setDetailsOrder} onInvoice={downloadDemoInvoice} onReorder={reorder} />}{visibleOrders.filter(order => order.id !== expandedOrder?.id).map(order => <OrderListItem key={order.id} order={order} onSelect={selectOrder} />)}{visibleOrders.length === 0 && <div className="p-10 text-center"><h2 className="text-lg font-bold text-[#17243b]">No orders found</h2><p className="mt-1 text-sm text-slate-500">Try a different search, status, or date range.</p><button type="button" onClick={() => { setSearch(''); setFilter('all'); setDateRange('all') }} className="mt-4 rounded-lg bg-emerald-700 px-4 py-2 text-sm text-white">Show all orders</button></div>}</div></section><OrdersAside onInvoice={() => expandedOrder && downloadDemoInvoice(expandedOrder)} onReorder={() => expandedOrder && reorder(expandedOrder)} /></div></div>{detailsOrder && <OrderDetailsDialog order={detailsOrder} onClose={() => setDetailsOrder(null)} onInvoice={downloadDemoInvoice} onReorder={reorder} />}{notice && <div role="status" className="fixed bottom-4 right-4 z-50 max-w-sm rounded-lg bg-emerald-900 px-4 py-3 text-sm text-white shadow-xl">{notice}<Link to={routes.consumer.cart} className="ml-2 font-semibold underline">View Cart</Link><button type="button" aria-label="Dismiss notification" onClick={() => setNotice('')} className="ml-3 text-lg leading-none">×</button></div>}</div>
+  return <div className="consumer-page">
+    <OrdersHero />
+    <div className="consumer-page-content space-y-5"><OrderStats values={counts} /><div className="grid items-start gap-5 min-[1400px]:grid-cols-[minmax(0,1fr)_minmax(290px,320px)]">
+      <section id="orders-list" className="min-w-0 rounded-xl border border-[#dfe8ef] bg-white shadow-sm"><OrderFilters filter={filter} onFilter={value => { setFilter(value); setCollapsed(false) }} counts={counts} dateRange={dateRange} onDateRange={value => { setDateRange(value); setCollapsed(false) }} search={search} onSearch={value => { setSearch(value); setCollapsed(false) }} /><div className="space-y-3 p-3 sm:p-4">{expandedOrder && <ExpandedOrderCard order={expandedOrder} onCollapse={() => setCollapsed(true)} onDetails={setDetailsOrder} onInvoice={downloadDemoInvoice} onReorder={reorder} onCancel={setCancelOrder} />}{visibleOrders.filter(order => order.id !== expandedOrder?.id).map(order => <OrderListItem key={order.id} order={order} onSelect={selectOrder} />)}{visibleOrders.length === 0 && <div className="p-10 text-center"><h2 className="text-lg font-bold text-[#17243b]">No orders found</h2><p className="mt-1 text-sm text-slate-500">Try a different search, status, or date range.</p><button type="button" onClick={() => { setSearch(''); setFilter('all'); setDateRange('all') }} className="mt-4 rounded-lg bg-emerald-700 px-4 py-2 text-sm text-white">Show all orders</button></div>}</div></section>
+      <OrdersAside onInvoice={() => expandedOrder && downloadDemoInvoice(expandedOrder)} onReorder={() => expandedOrder && reorder(expandedOrder)} />
+    </div></div>
+    {detailsOrder && <OrderDetailsDialog order={detailsOrder} onClose={() => setDetailsOrder(null)} onInvoice={downloadDemoInvoice} onReorder={reorder} />}
+    <CancelOrderModal open={Boolean(cancelOrder)} orderId={cancelOrder?.id} onClose={() => setCancelOrder(null)} onSuccess={cancelled} />
+    {notice && <div role="status" className="fixed bottom-4 right-4 z-50 max-w-sm rounded-lg bg-emerald-900 px-4 py-3 text-sm text-white shadow-xl">{notice}{notice.includes('cart') && <Link to={routes.consumer.cart} className="ml-2 font-semibold underline">View Cart</Link>}<button type="button" aria-label="Dismiss notification" onClick={() => setNotice('')} className="ml-3 text-lg leading-none">×</button></div>}
+  </div>
 }
