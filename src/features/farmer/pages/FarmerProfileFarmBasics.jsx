@@ -51,12 +51,22 @@ export default function FarmerProfileFarmBasics() {
 
   const load = async () => {
     setLoading(true); setLoadError('')
-    try { setFarm(await getFarmDetails()) } catch { setLoadError('We could not load your farm details. Please try again.') } finally { setLoading(false) }
+    try { 
+      const data = await getFarmDetails()
+      setFarm(data) 
+    } catch { 
+      setLoadError('We could not load your farm details. Please try again.') 
+    } finally { 
+      setLoading(false) 
+    }
   }
 
   useEffect(() => {
     let active = true
-    getFarmDetails().then((data) => { if (active) setFarm(data) }).catch(() => { if (active) setLoadError('We could not load your farm details. Please try again.') }).finally(() => { if (active) setLoading(false) })
+    getFarmDetails()
+      .then((data) => { if (active) setFarm(data) })
+      .catch(() => { if (active) setLoadError('We could not load your farm details. Please try again.') })
+      .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [])
 
@@ -78,21 +88,36 @@ export default function FarmerProfileFarmBasics() {
 
   const addPhotos = async (files) => {
     setUploading(true); setPhotoError(''); setUploadProgress(0)
-    try { const photos = await uploadFarmPhotos(files, farm.photos.length, setUploadProgress); setFarm((current) => ({ ...current, photos: [...current.photos, ...photos] })); setToast('Farm photos uploaded') } catch (error) { setPhotoError(error.message || 'Error uploading photos') } finally { setUploading(false) }
+    try { 
+      const photos = await uploadFarmPhotos(files, farm.photos.length, setUploadProgress)
+      setFarm((current) => ({ ...current, photos: [...current.photos, ...photos] }))
+      setToast('Farm photos uploaded') 
+    } catch (error) { 
+      setPhotoError(error.message || 'Error uploading photos') 
+    } finally { 
+      setUploading(false) 
+    }
   }
 
   const save = async (mode) => {
     if (mode === 'continue') {
       const nextErrors = validate(farm)
       setErrors(nextErrors)
-      if (Object.keys(nextErrors).length) { document.querySelector('.has-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return }
+      if (Object.keys(nextErrors).length) { 
+        document.querySelector('.has-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+        return 
+      }
     }
     setSaving(true)
     try {
       if (mode === 'draft') { await saveFarmDraft(farm); setToast('Farm details saved as draft') }
       if (mode === 'back') { await saveFarmDraft(farm); navigate(routes.farmer.profile) }
       if (mode === 'continue') { await updateFarmDetails(farm); navigate(routes.farmer.profileVerification) }
-    } catch { setToast('Something went wrong. Please try again.') } finally { setSaving(false) }
+    } catch { 
+      setToast('Something went wrong. Please try again.') 
+    } finally { 
+      setSaving(false) 
+    }
   }
 
   return <>

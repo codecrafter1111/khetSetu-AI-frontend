@@ -98,7 +98,8 @@ export default function LoginPage() {
           password: form.password,
         })
 
-        const { access, refresh, role, user, is_verified } = response.data
+        // FIXED: Using 'access_token' and 'refresh_token' matching your Django LoginView
+        const { access_token, refresh_token, role, user, is_verified } = response.data
         const assignedRole = role || user?.role
 
         // Handle Unverified Account Flag directly from Login Response
@@ -112,8 +113,8 @@ export default function LoginPage() {
 
         // Token & Role Storage Setup
         const storage = form.remember ? localStorage : sessionStorage
-        if (access) storage.setItem('access_token', access)
-        if (refresh) storage.setItem('refresh_token', refresh)
+        if (access_token) storage.setItem('access_token', access_token)
+        if (refresh_token) storage.setItem('refresh_token', refresh_token)
         if (assignedRole) storage.setItem('khetsetu-role', assignedRole)
 
         window.dispatchEvent(new Event('storage'))
@@ -193,13 +194,13 @@ export default function LoginPage() {
         otp: otp.trim(),
       })
 
-      const { access, refresh, role, user } = response.data
+      const { access_token, refresh_token, role, user } = response.data
       const assignedRole = role || user?.role
 
-      if (access && refresh) {
+      if (access_token && refresh_token) {
         const storage = form.remember ? localStorage : sessionStorage
-        storage.setItem('access_token', access)
-        storage.setItem('refresh_token', refresh)
+        storage.setItem('access_token', access_token)
+        storage.setItem('refresh_token', refresh_token)
         if (assignedRole) storage.setItem('khetsetu-role', assignedRole)
 
         window.dispatchEvent(new Event('storage'))
