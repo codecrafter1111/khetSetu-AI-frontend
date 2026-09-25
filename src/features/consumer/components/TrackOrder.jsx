@@ -1,0 +1,8 @@
+import { Check, Truck } from 'lucide-react'
+import { routes } from '../../../config/routes'
+import { orderSteps } from '../data/dashboard.mock'
+import ProductPhoto from './ProductPhoto'
+import SectionTitle from './SectionTitle'
+export default function TrackOrder() {
+  return <section className="min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><SectionTitle icon={Truck} title="Track Your Order" to={routes.consumer.orders} action="View All Orders" /><div className="rounded-lg border border-slate-100 px-3 py-3"><ol className="grid grid-cols-5 gap-1">{orderSteps.map((step, index) => <li key={step.label} className="relative text-center text-[10px] leading-tight text-slate-500"><span className={`relative z-10 mx-auto mb-1 grid size-3.5 place-items-center rounded-full ${step.complete ? 'bg-emerald-700 text-white' : 'bg-slate-300 text-white'}`}>{step.complete && <Check size={10} />}</span>{index < orderSteps.length - 1 && <span className={`absolute left-[53%] right-[-53%] top-[6px] h-0.5 ${index < 2 ? 'bg-emerald-700' : 'bg-slate-300'}`} />}<span className="block">{step.label}</span><span>{step.date}</span></li>)}</ol><div className="mt-3 flex items-center gap-2"><ProductPhoto tile={0} alt="Organic Basmati Rice" className="size-14 shrink-0 rounded-md" /><div className="min-w-0"><p className="truncate text-[11px] font-medium text-slate-900">Organic Basmati Rice (5 kg)</p><p className="text-[10px] text-slate-500">Order #KS8721</p></div><span className="ml-auto shrink-0 rounded-full bg-blue-50 px-2 py-1 text-[10px] font-medium text-blue-700">Out for Delivery</span><p className="hidden shrink-0 text-[10px] text-slate-600 sm:block">Expected Apr 26, 2025</p></div></div></section>
+}
