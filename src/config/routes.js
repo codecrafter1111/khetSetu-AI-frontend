@@ -1,4 +1,18 @@
 export const routes = {
+  consumer: {
+    dashboard: '/consumer/dashboard',
+    products: '/consumer/products',
+    productDetail: '/consumer/products/a2-cow-ghee',
+    cart: '/consumer/cart',
+    payment: '/consumer/checkout/payment',
+    orders: '/consumer/orders',
+    subscriptions: '/consumer/subscriptions',
+    farmPassport: '/consumer/farm-passport',
+    wishlist: '/consumer/wishlist',
+    reviews: '/consumer/reviews',
+    profile: '/consumer/profile',
+    help: '/consumer/help',
+  },
   farmer: {
     dashboard: '/farmer/dashboard',
     farm: '/farmer/farm',

@@ -7,3 +7,48 @@
   button { cursor: pointer; }
   :focus-visible { @apply outline-2 outline-offset-2 outline-emerald-600; }
 }
+.consumer-produce {
+  background-image: url('/images/consumer/produce-sheet.png');
+  background-size: 400% 200%;
+  background-position: var(--tile-x) var(--tile-y);
+  background-repeat: no-repeat;
+}
+.consumer-product-photo {
+  background-image: url('/images/consumer/products-sheet.png');
+  background-size: 400% 200%;
+  background-position: var(--tile-x) var(--tile-y);
+  background-repeat: no-repeat;
+}
+.consumer-hero {
+  background-image: linear-gradient(90deg, rgba(246, 255, 248, .94) 0%, rgba(246, 255, 248, .74) 41%, rgba(246, 255, 248, .10) 78%), url('/images/dashboard/farmer-hero.png');
+  background-size: cover;
+  background-position: center;
+}
+.consumer-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 58%;
+  background: url('/images/consumer/hero.png') right center / auto 100% no-repeat;
+  mask-image: linear-gradient(90deg, transparent, black 28%);
+}
+.consumer-page {
+  min-width: 0;
+  min-height: calc(100vh - 72px);
+  padding: clamp(16px, 1.8vw, 30px);
+  background: #f5fbfd;
+}
+.consumer-page > .consumer-hero,
+.consumer-page > header {
+  border-radius: 18px;
+}
+.consumer-page-content {
+  margin-top: 22px;
+}
+@media (max-width: 639px) {
+  .consumer-page-content { margin-top: 18px; }
+  .consumer-page .consumer-hero {
+    background-image: linear-gradient(rgba(246, 255, 248, .91), rgba(246, 255, 248, .84)), url('/images/dashboard/farmer-hero.png');
+  }
+  .consumer-page .consumer-hero::before { display: none; }
+}

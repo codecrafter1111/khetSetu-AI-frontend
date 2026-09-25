@@ -1,0 +1,6 @@
+import { LayoutGrid } from 'lucide-react'
+import { shopCategories } from '../data/shopProducts.mock'
+import ProductPhoto from './ProductPhoto'
+export default function ProductCategoryCarousel({ selected, onSelect }) {
+  return <div className="flex gap-2 overflow-x-auto rounded-xl border border-slate-200 bg-white p-2 shadow-sm">{shopCategories.map(category => <button key={category.name} type="button" aria-pressed={selected === category.name || (!selected && category.name === 'All Products')} onClick={() => onSelect(category.name === 'All Products' ? '' : category.name)} className={`flex min-w-[88px] flex-1 flex-col items-center justify-center rounded-lg border p-1.5 text-center text-[11px] font-semibold ${selected === category.name || (!selected && category.name === 'All Products') ? 'border-emerald-200 bg-emerald-50 text-emerald-950' : 'border-slate-100 bg-slate-50/60 text-slate-800 hover:bg-emerald-50'}`}>{category.tile === undefined ? <span className="grid size-[56px] place-items-center text-emerald-800"><LayoutGrid size={31} fill="currentColor" /></span> : <ProductPhoto tile={category.tile} alt={category.name} className="size-[56px] rounded-lg" />}<span className="mt-1 leading-tight">{category.name}</span></button>)}</div>
+}
